@@ -8,28 +8,29 @@ app = Flask(__name__)
 API_TOKEN = '7806770273:AAF6rXZhHXzBZlcTxESm7aUlqiDf3_X--EY'
 bot = Bot(API_TOKEN)
 
-# Root route for basic testing
+# Root route for testing
 @app.route('/')
 def home():
     return 'Bot is running!'
 
 # Webhook endpoint to receive messages
-@app.route('/webhook', methods=['POST'])
+@app.route('/webhook', methods=['POST'])  # Ensure it accepts POST requests
 def webhook():
-    data = request.get_json()
+    data = request.get_json()  # Parse the incoming JSON payload
 
     if not data:
-        return 'No data received', 400
+        return 'No data received', 400  # Return 400 for invalid data
 
+    # Safely handle incoming data
     message = data.get('message')
     if message:
         chat_id = message['chat']['id']
         text = message.get('text', '')
         bot.send_message(chat_id=chat_id, text="Received your message: " + text)
 
-    return '', 200
+    return '', 200  # Return 200 OK to indicate success
 
 if __name__ == '__main__':
-    # Use the Heroku-assigned port
+    # Use the port assigned by Heroku
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
