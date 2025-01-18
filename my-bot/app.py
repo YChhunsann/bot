@@ -15,20 +15,18 @@ def home():
 
 # Webhook endpoint to receive messages
 @app.route('/webhook', methods=['POST'])  # Ensure it accepts POST requests
-def webhook():
-    data = request.get_json()  # Parse the incoming JSON payload
+# Example: Correct way to call an async method
+@app.route('/webhook', methods=['POST'])
+async def webhook():
+    # Parse the incoming request (assuming JSON payload)
+    data = request.get_json()
+    chat_id = data.get('chat_id')
+    text = data.get('text')
 
-    if not data:
-        return 'No data received', 400  # Return 400 for invalid data
+    # Send a message using the bot (await is required)
+    await bot.send_message(chat_id=chat_id, text=f"Received your message: {text}")
 
-    # Safely handle incoming data
-    message = data.get('message')
-    if message:
-        chat_id = message['chat']['id']
-        text = message.get('text', '')
-        bot.send_message(chat_id=chat_id, text="Received your message: " + text)
-
-    return '', 200  # Return 200 OK to indicate success
+    return "OK", 200
 
 if __name__ == '__main__':
     # Use the port assigned by Heroku
