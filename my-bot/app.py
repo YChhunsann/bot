@@ -1,5 +1,6 @@
 from flask import Flask, request
 from telegram import Bot
+import os
 
 app = Flask(__name__)
 
@@ -7,22 +8,28 @@ app = Flask(__name__)
 API_TOKEN = '7806770273:AAF6rXZhHXzBZlcTxESm7aUlqiDf3_X--EY'
 bot = Bot(API_TOKEN)
 
+# Root route for basic testing
+@app.route('/')
+def home():
+    return 'Bot is running!'
+
 # Webhook endpoint to receive messages
 @app.route('/webhook', methods=['POST'])
 def webhook():
     data = request.get_json()
 
-    # Check if the message is in the incoming data
-    if 'message' in data:
-        message = data['message']
-        chat_id = message['chat']['id']
-        text = message['text']
+    if not data:
+        return 'No data received', 400
 
-        # Here, you can forward the message to another bot or process the message
+    message = data.get('message')
+    if message:
+        chat_id = message['chat']['id']
+        text = message.get('text', '')
         bot.send_message(chat_id=chat_id, text="Received your message: " + text)
 
     return '', 200
 
 if __name__ == '__main__':
-    # Run the Flask server
-    app.run(port=5000)
+    # Use the Heroku-assigned port
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port)
